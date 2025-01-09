@@ -1,0 +1,20 @@
+#[build]
+#rustflags = [
+#    "-C", "target-feature=+crt-static",
+#    "-L", "native=E:\\WorkSpace\\CppProjects\\llama.cpp\\build-x64-windows-vulkan-release\\lib",
+#    "-L", "native=D:\\Scoop\\apps\\vulkan\\current\\Lib",
+##    "-l", "static=qwen_lib",
+#    "-l", "static=libocr",
+#    "-l", "static=common",
+#    "-l", "static=ggml",
+#    "-l", "static=ggml-base",
+#    "-l", "static=ggml-cpu",
+#    "-l", "static=ggml-vulkan",
+#    "-l", "static=llama",
+#    "-l", "static=vulkan-1",
+#    "-l","dylib=DirectML",
+#    "-l","dylib=d3d12",
+#    "-l","dylib=dxgi",
+#    "-l","dylib=dxcore",
+#
+#]

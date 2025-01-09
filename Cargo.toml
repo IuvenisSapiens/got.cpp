@@ -1,0 +1,25 @@
+[package]
+name = "VLBindTest"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+latex2mmlc = { git = "https://github.com/tmke8/latex2mmlc" }
+clipboard-win = "5.4.0"
+anyhow = "1.0.95"
+ort = { git = "https://github.com/MosRat/ort", branch = "dev", features = ["directml","onednn"] }
+ndarray = "0.16"
+image = "0.25.5"
+
+[features]
+default = ["got"]
+vl = []
+got = []
+
+[profile.release]
+lto = true          # 启用链接时优化
+codegen-units = 1   # 减少代码生成单元以提高优化效果
+opt-level = 3       # 最高优化级别
+panic = "abort"     # 将 panic 行为设置为直接终止程序，减少二进制大小
+incremental = false # 禁用增量编译以确保完全优化
+strip = true        # 移除调试符号
