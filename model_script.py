@@ -569,6 +569,11 @@ def _io_config(model):
 #     return dummy_inputs
 
 if __name__ == "__main__":
+    print(r"""Usage:
+    olive auto-opt -m .\encoder_weights.pth  --model_script .\model_script.py --is_generative_model False --device "gpu" --provider "DmlExecutionProvider"
+    """)
+    exit(0)
+    
     import numpy as np
     model = GotEncoder()
     model.load_state_dict(
