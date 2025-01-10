@@ -8,7 +8,7 @@ LLama.cpp不支持GOT 魔改的 Vision Encoder，水平有限懒得改clip.cpp�
 正好最近gguf那边因为精度bug问题停了clip的GPU支持，反正encoder的IO很简单，所以不如拿onnx+dml简单快速。
 
 提取Encoder的代码在 [main.ipynb](main.ipynb) 里，这一步只提取pt文件。onnx是通过 [MS Olive](https://github.com/microsoft/Olive)
-转换的（官方说dml对静态形状支持的更好），也可以直接用torch.onnx.export导出。
+转换的（官方说dml对静态形状支持的更好），脚本是[model_script.py](model_script.py)，也可以直接用torch.onnx.export导出。
 
 ### Decoder 
 
