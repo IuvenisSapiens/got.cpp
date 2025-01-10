@@ -15,7 +15,7 @@ LLama.cpp不支持GOT 魔改的 Vision Encoder，水平有限懒得改clip.cpp�
 
 Decoder是Qwen0.5B，拿huggingface的QwenForCasualLM直接导入GOT权重就行，头痛的是他tokenizer用的是tiktoken，需要自己手动改成huggingface的。代码在 [main.ipynb](main.ipynb) 里。拿到model和tokenizer后直接上传[huggingface仓库](https://huggingface.co/MosRat/got_decoder/tree/main)白嫖在线转换。
 
-decoder的推理在多模态llava.cpp上做个改动，编译了一个库[libocr](cpp)。CUDA运行时太大了还分版本，所以Vulkan启动！
+decoder的推理在多模态llava.cpp上做个改动，编译了成cpp库 [libocr](cpp)。CUDA运行时太大了还分版本，所以Vulkan启动！
 
 
 ### Cli
