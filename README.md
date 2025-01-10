@@ -2,7 +2,7 @@
 [![Hugging Face](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Model-blue)](https://huggingface.co/MosRat/got_decoder-Q4_K_M-GGUF)
 
 使用llama.cpp和onnxruntime 加速推理 [GOT OCR 2.0](https://github.com/Ucas-HaoranWei/GOT-OCR2.0) 
-> 支持从图片直接输出文字，只依赖onnxruntime和llama.cpp，带模型400M左右。2-3G显存占用，笔记本显卡速度也快。
+> 支持从图片直接输出文字，只依赖onnxruntime和llama.cpp，带模型4-500M左右。2-3G显存占用，笔记本显卡速度也快。
 ### Encoder
 LLama.cpp不支持GOT 魔改的 Vision Encoder，水平有限懒得改clip.cpp的计算图，
 正好最近gguf那边因为精度bug问题停了clip的GPU支持，反正encoder的IO很简单，所以不如拿onnx+dml简单快速。
