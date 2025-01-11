@@ -49,6 +49,7 @@ impl GoTEncoder {
             // .with_parallel_execution(true)?
             // .with_intra_threads(16)?
             // .with_device_allocator_for_initializers()?
+            // .with_optimized_model_path(r#"D:\whl\Desktop\got.cpp\encoder_opt2.onnx"#)?
             .with_profiling(r#"C:\Users\whl\WorkSpace\RustProjects\GotOnnx\profile"#)?
             .with_execution_providers([
                 #[cfg(target_os = "windows")]

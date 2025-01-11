@@ -132,6 +132,7 @@ fn main() {
     #[cfg(feature = "got")]
     {
         let args: Vec<String> = std::env::args().collect();
+        println!("Use args{args:?}");
         let encoder_model_path = args
             .get(1)
             .map(|s| std::path::PathBuf::from(s))
@@ -140,7 +141,7 @@ fn main() {
                 r#".\encoder_single.onnx"#,
             ));
         let decoder_model_path = args
-            .get(1)
+            .get(2)
             .map(|s| std::path::PathBuf::from(s))
             .filter(|p| p.exists())
             .unwrap_or(std::path::PathBuf::from(
