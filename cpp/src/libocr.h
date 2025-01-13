@@ -25,7 +25,7 @@
 // #define LLAMA_BUILD
 #ifdef OCR_SHARED
 #    if defined(_WIN32) && !defined(__MINGW32__)
-#        ifdef LLAMA_BUILD
+#        ifdef OCR_BUILD
 #            define OCR_API __declspec(dllexport)
 #        else
 #            define OCR_API __declspec(dllimport)
