@@ -1,3 +1,4 @@
+#![allow(unused)]
 use crate::vit_image_processor::{rescale_and_normalize, resize};
 use anyhow::{anyhow, Result};
 use image::imageops::FilterType;
@@ -34,7 +35,6 @@ pub fn dynamic_preprocess(
         .collect();
     target_ratios.sort_by_key(|&(i, j)| i * j);
 
-    // eprintln!("{target_ratios:?}");
 
     let best_ratio = target_ratios
         .into_iter()
@@ -47,7 +47,6 @@ pub fn dynamic_preprocess(
         })
         .unwrap();
 
-    // eprintln!("{best_ratio:?} {aspect_ratio:?}");
 
     let target_width = (pre_process_config.image_size * best_ratio.0) as u32;
     let target_height = (pre_process_config.image_size * best_ratio.1) as u32;
