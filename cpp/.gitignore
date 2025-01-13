@@ -1,0 +1,20 @@
+# Clion xxxx
+cmake-build-debug
+
+# Ignore all build directories
+build-*/
+
+# Ignore compiled files
+*.o
+*.a
+*.so
+
+# Ignore IDE-specific files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Ignore other generated files
+*.log
+*.out

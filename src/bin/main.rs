@@ -137,19 +137,16 @@ fn main() {
             .get(1)
             .map(|s| std::path::PathBuf::from(s))
             .filter(|p| p.exists())
-            .unwrap_or(std::path::PathBuf::from(
-                r#".\encoder_single.onnx"#,
-            ));
+            .unwrap_or(std::path::PathBuf::from(r#".\encoder_single.onnx"#));
         let decoder_model_path = args
             .get(2)
             .map(|s| std::path::PathBuf::from(s))
             .filter(|p| p.exists())
-            .unwrap_or(std::path::PathBuf::from(
-                r#".\got_decoder-q4_k_m.gguf"#,
-            ));
+            .unwrap_or(std::path::PathBuf::from(r#".\got_decoder-q4_k_m.gguf"#));
 
         let s = std::time::Instant::now();
-        let model = GotOcr::from_encoder_decoder(encoder_model_path, decoder_model_path).unwrap();
+        let model = GotOcr::from_encoder_decoder(encoder_model_path, decoder_model_path)
+            .expect("cant find model in path!0");
         println!("Load model time cost: {:?}", s.elapsed());
 
         // 进入交互循环
