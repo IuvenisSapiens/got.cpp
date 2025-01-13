@@ -18,10 +18,10 @@ from typing import Type
 
 class MLPBlock(nn.Module):
     def __init__(
-        self,
-        embedding_dim: int,
-        mlp_dim: int,
-        act: Type[nn.Module] = nn.GELU,
+            self,
+            embedding_dim: int,
+            mlp_dim: int,
+            act: Type[nn.Module] = nn.GELU,
     ) -> None:
         super().__init__()
         self.lin1 = nn.Linear(embedding_dim, mlp_dim)
@@ -49,23 +49,23 @@ class LayerNorm2d(nn.Module):
 
 class ImageEncoderViT(nn.Module):
     def __init__(
-        self,
-        img_size: int = 1024,
-        patch_size: int = 16,
-        in_chans: int = 3,
-        embed_dim: int = 768,
-        depth: int = 12,
-        num_heads: int = 12,
-        mlp_ratio: float = 4.0,
-        out_chans: int = 256,
-        qkv_bias: bool = True,
-        norm_layer: Type[nn.Module] = nn.LayerNorm,
-        act_layer: Type[nn.Module] = nn.GELU,
-        use_abs_pos: bool = True,
-        use_rel_pos: bool = False,
-        rel_pos_zero_init: bool = True,
-        window_size: int = 0,
-        global_attn_indexes: Tuple[int, ...] = (),
+            self,
+            img_size: int = 1024,
+            patch_size: int = 16,
+            in_chans: int = 3,
+            embed_dim: int = 768,
+            depth: int = 12,
+            num_heads: int = 12,
+            mlp_ratio: float = 4.0,
+            out_chans: int = 256,
+            qkv_bias: bool = True,
+            norm_layer: Type[nn.Module] = nn.LayerNorm,
+            act_layer: Type[nn.Module] = nn.GELU,
+            use_abs_pos: bool = True,
+            use_rel_pos: bool = False,
+            rel_pos_zero_init: bool = True,
+            window_size: int = 0,
+            global_attn_indexes: Tuple[int, ...] = (),
     ) -> None:
         """
         Args:
@@ -158,23 +158,24 @@ class ImageEncoderViT(nn.Module):
 
         return x
 
+
 # MODIFIED
 class Block(nn.Module):
     """Transformer blocks with support of window attention and residual propagation blocks"""
 
     def __init__(
-        self,
-        layer_idx: int,
-        dim: int,
-        num_heads: int,
-        mlp_ratio: float = 4.0,
-        qkv_bias: bool = True,
-        norm_layer: Type[nn.Module] = nn.LayerNorm,
-        act_layer: Type[nn.Module] = nn.GELU,
-        use_rel_pos: bool = False,
-        rel_pos_zero_init: bool = True,
-        window_size: int = 0,
-        input_size: Optional[Tuple[int, int]] = None,
+            self,
+            layer_idx: int,
+            dim: int,
+            num_heads: int,
+            mlp_ratio: float = 4.0,
+            qkv_bias: bool = True,
+            norm_layer: Type[nn.Module] = nn.LayerNorm,
+            act_layer: Type[nn.Module] = nn.GELU,
+            use_rel_pos: bool = False,
+            rel_pos_zero_init: bool = True,
+            window_size: int = 0,
+            input_size: Optional[Tuple[int, int]] = None,
     ) -> None:
         """
         Args:
@@ -233,19 +234,20 @@ class Block(nn.Module):
 
         return x
 
+
 # MODIFIED
 class Attention(nn.Module):
     """Multi-head Attention block with relative position embeddings."""
 
     def __init__(
-        self,
-        dim: int,
-        layer_idx: int,
-        num_heads: int = 8,
-        qkv_bias: bool = True,
-        use_rel_pos: bool = False,
-        rel_pos_zero_init: bool = True,
-        input_size: Optional[Tuple[int, int]] = None,
+            self,
+            dim: int,
+            layer_idx: int,
+            num_heads: int = 8,
+            qkv_bias: bool = True,
+            use_rel_pos: bool = False,
+            rel_pos_zero_init: bool = True,
+            input_size: Optional[Tuple[int, int]] = None,
     ) -> None:
         """
         Args:
@@ -261,7 +263,7 @@ class Attention(nn.Module):
         self.layer_idx = layer_idx
         self.num_heads = num_heads
         head_dim = dim // num_heads
-        self.scale = head_dim**-0.5
+        self.scale = head_dim ** -0.5
         # print(self.scale,self.scale)
 
         self.qkv = nn.Linear(dim, dim * 3, bias=qkv_bias)
@@ -270,7 +272,7 @@ class Attention(nn.Module):
         self.use_rel_pos = use_rel_pos
         if self.use_rel_pos:
             assert (
-                input_size is not None
+                    input_size is not None
             ), "Input size must be provided if using relative positional encoding."
             # initialize relative positional embeddings
             print("attn input_size", input_size)
@@ -280,13 +282,13 @@ class Attention(nn.Module):
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         # B, _, _, _ = x.shape
         # qkv with shape (3, B, nHead, H * W, C)
-        print(self.layer_idx, x.shape)
+        # print(self.layer_idx, x.shape)
 
         if self.layer_idx not in [2, 5, 8, 11]:
             B, H, W = 25, 14, 14
         else:
             B, H, W = 1, 64, 64
-        print("attention", x.shape, self.use_rel_pos)
+        # print("attention", x.shape, self.use_rel_pos)
         qkv = (
             self.qkv(x.reshape(B, H * W, 768))
             .reshape(B, H * W, 3, 12, 64)
@@ -296,7 +298,7 @@ class Attention(nn.Module):
         # q, k, v with shape (B * nHead, H * W, C)
         new_b = B * 12
         q, k, v = qkv.reshape(3, new_b, H * W, 64).unbind(0)
-        print("attention", qkv.shape, q.shape, k.shape, v.shape)
+        # print("attention", qkv.shape, q.shape, k.shape, v.shape)
 
         attn = (q * self.scale) @ k.transpose(-2, -1)
 
@@ -318,7 +320,7 @@ class Attention(nn.Module):
 
 
 def window_partition(
-    x: torch.Tensor, window_size: int
+        x: torch.Tensor, window_size: int
 ) -> Tuple[torch.Tensor, Tuple[int, int]]:
     """
     Partition into non-overlapping windows with padding if needed.
@@ -350,10 +352,10 @@ def window_partition(
 
 
 def window_unpartition(
-    windows: torch.Tensor,
-    window_size: int,
-    pad_hw: Tuple[int, int],
-    hw: Tuple[int, int],
+        windows: torch.Tensor,
+        window_size: int,
+        pad_hw: Tuple[int, int],
+        hw: Tuple[int, int],
 ) -> torch.Tensor:
     """
     Window unpartition into original sequences and removing padding.
@@ -416,14 +418,14 @@ def get_rel_pos(q_size: int, k_size: int, rel_pos: torch.Tensor) -> torch.Tensor
 
 
 def add_decomposed_rel_pos(
-    attn: torch.Tensor,
-    q: torch.Tensor,
-    dim,
-    B,
-    rel_pos_h: torch.Tensor,
-    rel_pos_w: torch.Tensor,
-    q_size: Tuple[int, int],
-    k_size: Tuple[int, int],
+        attn: torch.Tensor,
+        q: torch.Tensor,
+        dim,
+        B,
+        rel_pos_h: torch.Tensor,
+        rel_pos_w: torch.Tensor,
+        q_size: Tuple[int, int],
+        k_size: Tuple[int, int],
 ) -> torch.Tensor:
     """
     Args:
@@ -453,9 +455,9 @@ def add_decomposed_rel_pos(
     print("rope", Rh.shape, Rw.shape, rel_h.shape, rel_w.shape)
 
     attn = (
-        attn.view(B, q_h, q_w, k_h, k_w)
-        + rel_h[:, :, :, :, None]
-        + rel_w[:, :, :, None, :]
+            attn.view(B, q_h, q_w, k_h, k_w)
+            + rel_h[:, :, :, :, None]
+            + rel_w[:, :, :, None, :]
     ).view(B, q_h * q_w, k_h * k_w)
 
     return attn
@@ -467,12 +469,12 @@ class PatchEmbed(nn.Module):
     """
 
     def __init__(
-        self,
-        kernel_size: Tuple[int, int] = (16, 16),
-        stride: Tuple[int, int] = (16, 16),
-        padding: Tuple[int, int] = (0, 0),
-        in_chans: int = 3,
-        embed_dim: int = 768,
+            self,
+            kernel_size: Tuple[int, int] = (16, 16),
+            stride: Tuple[int, int] = (16, 16),
+            padding: Tuple[int, int] = (0, 0),
+            in_chans: int = 3,
+            embed_dim: int = 768,
     ) -> None:
         """
         Args:
@@ -506,11 +508,11 @@ def build_GOT_vit_b(checkpoint=None):
 
 
 def _build_GOT_vision(
-    encoder_embed_dim,
-    encoder_depth,
-    encoder_num_heads,
-    encoder_global_attn_indexes,
-    checkpoint=None,
+        encoder_embed_dim,
+        encoder_depth,
+        encoder_num_heads,
+        encoder_global_attn_indexes,
+        checkpoint=None,
 ):
     prompt_embed_dim = 256
     image_size = 1024
@@ -573,15 +575,16 @@ if __name__ == "__main__":
     olive auto-opt -m .\encoder_weights.pth  --model_script .\model_script.py --is_generative_model False --device "gpu" --provider "DmlExecutionProvider"
     """)
     exit(0)
-    
+
     import numpy as np
+
     model = GotEncoder()
     model.load_state_dict(
         torch.load("encoder_weights.pth", map_location=torch.device("cpu"))
     )
     # print(model(torch.zeros(1, 3, 1024, 1024)).shape)
-    ls:np.ndarray = model(torch.zeros(1, 3, 1024, 1024)).detach().numpy()
-    np.savetxt("a.txt",ls)
+    ls: np.ndarray = model(torch.zeros(1, 3, 1024, 1024)).detach().numpy()
+    np.savetxt("a.txt", ls)
     # import json
     # json.dump(ls,open("res.txt","w",encoding='utf8'),)
     # t:torch.Tensor = model(torch.zeros(1, 3, 1024, 1024))

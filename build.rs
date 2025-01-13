@@ -5,7 +5,7 @@ fn main() {
     let current_dir = env::current_dir().expect("Failed to get current directory");
 
     // 构建相对路径
-    let cpp_lib_path = current_dir.join("cpp/build-x64-windows-vulkan-release/lib");
+    let cpp_lib_path = current_dir.join("cpp/build-x64-windows-vulkan-release/lib/static");
 
     // 设置重新构建的条件
     println!("cargo:rerun-if-changed={}", cpp_lib_path.display());

@@ -4,56 +4,43 @@
 
 #include "libocr.h"
 
-static bool eval_tokens(struct llama_context *ctx_llama, std::vector<llama_token> tokens, int n_batch, int *n_past,
-                        int *st_pos_id) {
+static bool eval_tokens(struct llama_context * ctx_llama, std::vector<llama_token> tokens, int n_batch, int * n_past) {
     int N = (int) tokens.size();
-    std::vector<llama_pos> pos;
     for (int i = 0; i < N; i += n_batch) {
         int n_eval = (int) tokens.size() - i;
         if (n_eval > n_batch) {
             n_eval = n_batch;
         }
-        auto batch = llama_batch_get_one(&tokens[i], n_eval);
-        // TODO: add mrope pos ids somewhere else
-        pos.resize(batch.n_tokens * 4);
-        std::fill(pos.begin(), pos.end(), 0);
-        for (int j = 0; j < batch.n_tokens * 3; j++) {
-            pos[j] = *st_pos_id + (j % batch.n_tokens);
-        }
-        batch.pos = pos.data();
-
-        if (llama_decode(ctx_llama, batch)) {
+        if (llama_decode(ctx_llama, llama_batch_get_one(&tokens[i], n_eval))) {
             LOG_ERR("%s : failed to eval. token %d/%d (batch size %d, n_past %d)\n", __func__, i, N, n_batch, *n_past);
             return false;
         }
         *n_past += n_eval;
-        *st_pos_id += n_eval;
     }
     return true;
 }
 
-static bool eval_id(struct llama_context *ctx_llama, int id, int *n_past, int *st_pos_id) {
+static bool eval_id(struct llama_context * ctx_llama, int id, int * n_past) {
     std::vector<llama_token> tokens;
     tokens.push_back(id);
-    return eval_tokens(ctx_llama, tokens, 1, n_past, st_pos_id);
+    return eval_tokens(ctx_llama, tokens, 1, n_past);
 }
 
-static bool eval_string(struct llama_context *ctx_llama, const char *str, int n_batch, int *n_past, int *st_pos_id,
-                        bool add_bos) {
-    std::string str2 = str;
+static bool eval_string(struct llama_context * ctx_llama, const char* str, int n_batch, int * n_past, bool add_bos){
+    std::string              str2     = str;
     std::vector<llama_token> embd_inp = common_tokenize(ctx_llama, str2, add_bos, true);
-    eval_tokens(ctx_llama, embd_inp, n_batch, n_past, st_pos_id);
+    eval_tokens(ctx_llama, embd_inp, n_batch, n_past);
     return true;
 }
 
-static const char *sample(struct common_sampler *smpl,
-                          struct llama_context *ctx_llama,
-                          int *n_past, int *st_pos_id) {
+static const char * sample(struct common_sampler * smpl,
+                           struct llama_context * ctx_llama,
+                           int * n_past) {
     const llama_token id = common_sampler_sample(smpl, ctx_llama, -1);
     common_sampler_accept(smpl, id, true);
 
-    const llama_model *model = llama_get_model(ctx_llama);
-    const llama_vocab *vocab = llama_model_get_vocab(model);
+    const llama_model * model = llama_get_model(ctx_llama);
+    const llama_vocab * vocab = llama_model_get_vocab(model);
 
     static std::string ret;
     if (llama_vocab_is_eog(vocab, id)) {
@@ -61,7 +48,7 @@ static const char *sample(struct common_sampler *smpl,
     } else {
         ret = common_token_to_piece(ctx_llama, id);
     }
-    eval_id(ctx_llama, id, n_past, st_pos_id);
+    eval_id(ctx_llama, id, n_past);
     return ret.c_str();
 }
 
@@ -85,8 +72,7 @@ static inline ocr_context *ocr_create_context(int argc, char **argv) {
     if (!ctx) {
         return NULL;
     }
-    // common_params p;
-    // ctx->params = static_cast<common_params *>(malloc(sizeof(common_params)));
+
     ctx->params = new common_params;
 
     // if (!common_params_parse(argc, argv, *ctx->params, LLAMA_EXAMPLE_MAIN, [](int, char **) {})) {
@@ -103,7 +89,7 @@ static inline ocr_context *ocr_create_context(int argc, char **argv) {
 
     ctx_params.n_ctx = ctx->params->n_ctx < 2048 ? 2048 : ctx->params->n_ctx;
 
-    llama_model *model = llama_load_model_from_file(ctx->params->model.c_str(), model_params);
+    llama_model *model = llama_model_load_from_file(ctx->params->model.c_str(), model_params);
     if (model == NULL) {
         // free(ctx->params);
         delete ctx->params;
@@ -111,9 +97,9 @@ static inline ocr_context *ocr_create_context(int argc, char **argv) {
         return NULL;
     }
 
-    llama_context *ctx_llama = llama_new_context_with_model(model, ctx_params);
+    llama_context *ctx_llama = llama_init_from_model(model, ctx_params);
     if (ctx_llama == NULL) {
-        llama_free_model(model);
+        llama_model_free(model);
         // free(ctx->params);
         delete ctx->params;
         free(ctx);
@@ -135,10 +121,9 @@ int ocr_free(void *ctx) {
         return -1;
     }
     auto *ocr_ctx = static_cast<ocr_context *>(ctx);
-    // free(ocr_ctx->params);
     delete ocr_ctx->params;
     llama_free(ocr_ctx->ctx);
-    llama_free_model(ocr_ctx->model);
+    llama_model_free(ocr_ctx->model);
     free(ocr_ctx);
     llama_backend_free();
     return 0;
@@ -160,7 +145,7 @@ int ocr_free_result(ocr_result *result) {
 
 bool got_eval_image_embed(llama_context *ctx_llama, llava_image_embed *got_embed, const int32_t n_batch,
                           int *n_past) {
-    const int n_embd = llama_n_embd(llama_get_model(ctx_llama));
+    const int n_embd = llama_model_n_embd(llama_get_model(ctx_llama));
     const auto img_tokens = got_embed->n_image_pos;
     for (int i = 0; i < img_tokens; i += n_batch) {
         int n_eval = img_tokens - i;
@@ -217,7 +202,6 @@ ocr_result *ocr_run(void *ctx, const float *image_embeds, const int n_embeds, co
     auto *ctx_llama = ocr_ctx->ctx;
     auto *model = ocr_ctx->model;
     int n_past = 0;
-    int cur_pos_id = 0;
     const int max_tgt_len = params->n_predict < 0 ? 256 : params->n_predict;
     auto *result = static_cast<ocr_result *>(malloc(sizeof(ocr_result)));
     result->result = NULL;
@@ -228,10 +212,10 @@ ocr_result *ocr_run(void *ctx, const float *image_embeds, const int n_embeds, co
     got_embed->embed = static_cast<float *>(malloc(n_embeds * dim * sizeof(float)));
     memcpy(got_embed->embed, image_embeds, n_embeds * dim * sizeof(float));
 
-    eval_string(ctx_llama, system_prompt, params->n_batch, &n_past, &cur_pos_id, false);
+    eval_string(ctx_llama, system_prompt, params->n_batch, &n_past, true);
     // got_eval_image_embed(ctx_llama, got_embed, params->n_batch, &n_past);
     llava_eval_image_embed(ctx_llama, got_embed, params->n_batch, &n_past);
-    eval_string(ctx_llama, user_prompt.c_str(), params->n_batch, &n_past, &cur_pos_id, false);
+    eval_string(ctx_llama, user_prompt.c_str(), params->n_batch, &n_past, false);
 
     params->sampling.temp = -1.0;
     struct common_sampler *smpl = common_sampler_init(model, params->sampling);
@@ -248,7 +232,7 @@ ocr_result *ocr_run(void *ctx, const float *image_embeds, const int n_embeds, co
     std::string response;
 
     for (int i = 0; i < max_tgt_len; i++) {
-        const char *tmp = sample(smpl, ctx_llama, &n_past, &cur_pos_id);
+        const char *tmp = sample(smpl, ctx_llama, &n_past);
         // fprintf(stderr, "token: %s\n", tmp);
         // fflush(stderr);
         if (strcmp(tmp, "</s>") == 0) {
@@ -289,6 +273,6 @@ int ocr_cleanup_ctx(void *ctx) {
     ctx_params.n_ctx = params->n_ctx < 2048 ? 2048 : params->n_ctx;
 
     llama_free(ocr_ctx->ctx);
-    ocr_ctx->ctx = llama_new_context_with_model(ocr_ctx->model, ctx_params);
+    ocr_ctx->ctx = llama_init_from_model(ocr_ctx->model, ctx_params);
     return 0;
 }
