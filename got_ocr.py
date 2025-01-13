@@ -39,7 +39,7 @@ class GOTImageEvalProcessor:
 cwd= Path(__file__).parent
 
 # 加载DLL
-dll_path = f"{ cwd / 'libocr.dll'}"
+dll_path = f"{ cwd / 'cpp/build-x64-windows-vulkan-release/bin/libocr.dll'}"
 libocr = ctypes.CDLL(dll_path)
 
 # 定义GOT_TYPE
@@ -96,7 +96,6 @@ def ocr_run(ctx, image_embeds, got_type):
 
     # 获取数组的指针
     image_embeds_ptr = image_embeds.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
-    print(image_embeds.size, image_embeds_ptr)
     # 调用 C 函数
     return libocr.ocr_run(ctx, image_embeds_ptr, image_embeds.shape[0], got_type)
 
@@ -112,7 +111,7 @@ def ocr_free_result(result):
 if __name__ == '__main__':
     encoder_path = str(cwd / "encoder_single.onnx")
     decoder_path = str(cwd / "got_decoder-q4_k_m.gguf")
-    img_path = r"test.jpeg"
+    img_path = r"PixPin_2025-01-08_01-26-39.png"
     img = Image.open(img_path).convert('RGB')
     session = ort.InferenceSession(encoder_path,
                                    providers=ort.get_available_providers())
@@ -130,7 +129,7 @@ if __name__ == '__main__':
         "input": img_arr.reshape(1, 3, 1024, 1024)
     })[0].reshape(256, 1024)
     try:
-        result = ocr_run(decoder, img_embeds, GOT_OCR_TYPE)
+        result = ocr_run(decoder, img_embeds, GOT_FORMAT_TYPE)
         if result:
             print("Result:", result.contents.result.decode('utf-8') if result.contents.result is not None else None)
             print("Error:", result.contents.error.decode('utf-8') if result.contents.error is not None else None)
