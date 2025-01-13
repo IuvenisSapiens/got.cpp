@@ -46,7 +46,7 @@ jobs:
         id: cmake_build
         run: |
           cmake -S cpp -B build-${{ matrix.preset }}
-          cmake build-${{ matrix.preset }} --config Release -j ${env:NUMBER_OF_PROCESSORS}
+          cmake --build build-${{ matrix.preset }} --config Release -j ${env:NUMBER_OF_PROCESSORS}
       
 
       - name: Determine tag name
