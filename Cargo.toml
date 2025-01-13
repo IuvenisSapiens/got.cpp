@@ -1,25 +1,30 @@
 [package]
-name = "VLBindTest"
+name = "got_rs"
 version = "0.1.0"
 edition = "2021"
+repository = "https://github.com/MosRat/got.cpp"
+authors = ["MosRat"]
+description = "Rust bind and cli for GOT OCR 2.0 with llama.cpp"
+
 
 [dependencies]
 latex2mmlc = { git = "https://github.com/tmke8/latex2mmlc" }
 clipboard-win = "5.4.0"
 anyhow = "1.0.95"
-ort = { git = "https://github.com/MosRat/ort", branch = "dev", features = ["directml","onednn"] }
+ort = { git = "https://github.com/MosRat/ort", branch = "dev", features = ["onednn"] }
 ndarray = "0.16"
 image = "0.25.5"
+clap = { version = "4.5.26", features = ["derive"] }
 
 [features]
-default = ["got"]
-vl = []
-got = []
+default = ["vulkan", "directml"]
+vulkan = []
+directml = ["ort/directml"]
 
 [profile.release]
-lto = true          # 启用链接时优化
-codegen-units = 1   # 减少代码生成单元以提高优化效果
-opt-level = 3       # 最高优化级别
-panic = "abort"     # 将 panic 行为设置为直接终止程序，减少二进制大小
-incremental = false # 禁用增量编译以确保完全优化
-strip = true        # 移除调试符号
+lto = true
+codegen-units = 1
+opt-level = 3
+panic = "abort"
+incremental = false
+strip = true

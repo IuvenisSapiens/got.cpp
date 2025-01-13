@@ -1,18 +1,17 @@
 // use crate::{error_window, print_deps, ENCODER_PATH, TEST_IMG_PATH};
+#![allow(unused)]
 use anyhow::{anyhow, Result};
 use ndarray::{concatenate, prelude::*, ArrayD, Axis};
 use ort::execution_providers::{
     CPUExecutionProvider, CUDAExecutionProvider, DirectMLExecutionProvider, ExecutionProvider,
     OneDNNExecutionProvider, OpenVINOExecutionProvider,
 };
-use ort::inputs;
 use ort::memory::{AllocationDevice, Allocator, AllocatorType, MemoryInfo, MemoryType};
 use ort::session::builder::{GraphOptimizationLevel, SessionBuilder};
 use ort::session::Session;
 use ort::value::Tensor;
 use std::ops::{Deref, DerefMut};
 use std::path::Path;
-use std::process::exit;
 
 pub struct GoTEncoder {
     session: Session,
