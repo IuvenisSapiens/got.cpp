@@ -8,8 +8,6 @@ build-*/
 *.o
 *.a
 *.so
-*.dll
-*.exe
 
 # Ignore IDE-specific files
 .vscode/
