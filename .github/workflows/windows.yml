@@ -46,8 +46,7 @@ jobs:
         id: cmake_build
         run: |
           cmake -S cpp -B build-${{ matrix.preset }}
-          cmake build-${{ matrix.preset }} --config Release -j ${env:NUMBER_OF_PROCESSORS}
-
+          cmake --build build-${{ matrix.preset }} --config Release -j ${env:NUMBER_OF_PROCESSORS}
 
       - name: Determine tag name
         id: tag
@@ -66,7 +65,7 @@ jobs:
         id: pack_artifacts
         if: ${{ ( github.event_name == 'push' && github.ref == 'refs/heads/master' ) || github.event.inputs.create_release == 'true' }}
         run: |
-          7z a got-${{ steps.tag.outputs.name }}-${{ matrix.preset }}.zip .\${{ matrix.preset }}\bin .\${{ matrix.preset }}\lib
+          7z a got-${{ steps.tag.outputs.name }}-${{ matrix.preset }}.zip .\build-${{ matrix.preset }}\bin .\build-${{ matrix.preset }}\lib
 
       - name: Upload artifacts
         if: ${{ ( github.event_name == 'push' && github.ref == 'refs/heads/master' ) || github.event.inputs.create_release == 'true' }}
