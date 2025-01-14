@@ -47,7 +47,6 @@ jobs:
         run: |
           cmake -S cpp -B build-${{ matrix.preset }}
           cmake --build build-${{ matrix.preset }} --config Release -j ${env:NUMBER_OF_PROCESSORS}
-      
 
       - name: Determine tag name
         id: tag
@@ -84,3 +83,119 @@ jobs:
       - name: Inspect artifact
         run: |
           ls ./artifact
+
+  build-rs:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+          - os: windows-latest
+            target: aarch64-pc-windows-msvc
+          - os: macos-latest
+            target: aarch64-apple-darwin
+          - os: macos-latest
+            target: x86_64-apple-darwin
+          - os: ubuntu-22.04
+            target: x86_64-unknown-linux-gnu
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install Rust Stable
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Add Rust Target
+        run: rustup target add ${{ matrix.target }}
+
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          cache-all-crates: true
+
+      - name: Install 7-Zip
+        shell: powershell
+        run: |
+          choco install 7zip -y
+
+      - name: Download onnxruntime artifact
+        shell: powershell
+        run: |
+          $artifactUrl = "https://github.com/MosRat/OnnxruntimeBuilder/actions/runs/12479887122/artifacts/2358986397"
+          $outputPath = "$env:RUNNER_TEMP\onnxruntime-v1.20.1-windows-vs2022-x64-static-mt.zip"
+          Invoke-WebRequest -Uri $artifactUrl -OutFile $outputPath
+      - name: Extract onnxruntime.zip
+        shell: powershell
+        run: |
+          $zipPath = "$env:RUNNER_TEMP\onnxruntime-v1.20.1-windows-vs2022-x64-static-mt.zip"
+          $extractPath = "$env:RUNNER_TEMP\onnxruntime"
+          Expand-Archive -Path $zipPath -DestinationPath $extractPath
+
+      - name: Extract onnxruntime.7z
+        shell: powershell
+        run: |
+          $sevenZipPath = "$env:RUNNER_TEMP\onnxruntime\onnxruntime-v1.20.1-windows-vs2022-x64-static-mt.7z"
+          $finalExtractPath = "$env:RUNNER_TEMP\onnxruntime\lib"
+          7z x $sevenZipPath -o$finalExtractPath
+
+      - name: Set ORT_LIB_LOCATION environment variable
+        shell: powershell
+        run: |
+          $libPath = "$env:RUNNER_TEMP\onnxruntime\lib\onnxruntime-v1.20.1-windows-vs2022-x64-static-mt\lib"
+          echo "ORT_LIB_LOCATION=$libPath" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Download got-x64-windows-vulkan-release.zip artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: got-x64-windows-vulkan-release.zip
+          path: ${{ runner.temp }}/artifact
+
+      - name: Find and extract the random-named zip file
+        shell: powershell
+        run: |
+          $randomZipFile = Get-ChildItem -Path "$env:RUNNER_TEMP\artifact" -Filter *.zip | Select-Object -First 1
+
+          if (-not $randomZipFile) {
+              throw "No zip file found in the artifact!"
+          }
+
+          $extractPath = "$env:RUNNER_TEMP\extracted"
+          Expand-Archive -Path $randomZipFile.FullName -DestinationPath $extractPath
+
+          $targetDir = "cpp/build-x64-windows-vulkan-release"
+          if (-not (Test-Path -Path $targetDir)) {
+              New-Item -ItemType Directory -Path $targetDir | Out-Null
+          }
+
+          $libPath = Join-Path -Path $extractPath -ChildPath "lib"
+          if (Test-Path -Path $libPath) {
+              Move-Item -Path $libPath -Destination $targetDir -Force
+          } else {
+              throw "lib folder not found in the extracted zip file!"
+          }
+      - name: Build with Cargo
+        run: cargo build --release
+
+      - name: Package got.exe
+        shell: powershell
+        run: |
+          $packageDir = "$env:RUNNER_TEMP\package"
+          New-Item -ItemType Directory -Path $packageDir | Out-Null
+
+          $exePath = "target/release/got.exe"
+          if (Test-Path -Path $exePath) {
+              Copy-Item -Path $exePath -Destination $packageDir
+          } else {
+              throw "got.exe not found in target/release!"
+          }
+
+          $zipPath = "$env:RUNNER_TEMP\got-x64-windows-vulkan-release.zip"
+          Compress-Archive -Path "$packageDir\*" -DestinationPath $zipPath
+
+      - name: Upload got.exe as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: got-x64-windows-vulkan-release
+          path: ${{ runner.temp }}/got-x64-windows-vulkan-release.zip

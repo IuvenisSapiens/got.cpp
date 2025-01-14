@@ -6,6 +6,12 @@ repository = "https://github.com/MosRat/got.cpp"
 authors = ["MosRat"]
 description = "Rust bind and cli for GOT OCR 2.0 with llama.cpp"
 
+[[bin]]
+name = "got"
+path = "src/bin/main.rs"
+[lib]
+name = "got_rs"
+path = "src/lib.rs"
 
 [dependencies]
 latex2mmlc = { git = "https://github.com/tmke8/latex2mmlc" }

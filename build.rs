@@ -24,11 +24,14 @@ fn main() {
     println!("cargo:rustc-link-lib=static=ggml");
     println!("cargo:rustc-link-lib=static=ggml-base");
     println!("cargo:rustc-link-lib=static=ggml-cpu");
-    println!("cargo:rustc-link-lib=static=ggml-vulkan");
+
     println!("cargo:rustc-link-lib=static=llama");
 
     #[cfg(feature = "vulkan")]
-    println!("cargo:rustc-link-lib=static=vulkan-1");
+    {
+        println!("cargo:rustc-link-lib=static=ggml-vulkan");
+        println!("cargo:rustc-link-lib=static=vulkan-1");
+    }
 
     #[cfg(feature = "directml")]
     {

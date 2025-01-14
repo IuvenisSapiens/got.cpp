@@ -202,7 +202,8 @@ ocr_result *ocr_run(void *ctx, const float *image_embeds, const int n_embeds, co
     auto *ctx_llama = ocr_ctx->ctx;
     auto *model = ocr_ctx->model;
     int n_past = 0;
-    const int max_tgt_len = params->n_predict < 0 ? 256 : params->n_predict;
+    // const int max_tgt_len = params->n_predict < 0 ? 256 : params->n_predict;
+    constexpr int max_tgt_len = 1024;
     auto *result = static_cast<ocr_result *>(malloc(sizeof(ocr_result)));
     result->result = NULL;
     result->error = NULL;
