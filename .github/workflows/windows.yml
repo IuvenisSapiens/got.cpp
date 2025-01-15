@@ -142,7 +142,7 @@ jobs:
         run: |
           $sevenZipPath = "$env:RUNNER_TEMP\onnxruntime-v1.20.1-windows-vs2022-x64-static-mt.7z"
           $finalExtractPath = "$env:RUNNER_TEMP\lib"
-          7z x $sevenZipPath -olib
+          7z x $sevenZipPath -o"lib"
 
       - name: Set ORT_LIB_LOCATION environment variable
         shell: powershell
