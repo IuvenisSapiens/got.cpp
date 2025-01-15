@@ -147,7 +147,7 @@ jobs:
       - name: Set ORT_LIB_LOCATION environment variable
         shell: powershell
         run: |
-          $libPath = "$env:RUNNER_TEMP\lib\onnxruntime-v1.20.1-windows-vs2022-x64-static-mt\lib"
+          $libPath = "$env:RUNNER_TEMP\lib\lib"
           echo "ORT_LIB_LOCATION=$libPath" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
       - name: Download got-x64-windows-vulkan-release.zip artifact
@@ -180,6 +180,7 @@ jobs:
               throw "lib folder not found in the extracted zip file!"
           }
           Get-ChildItem -Path "cpp/build-x64-windows-vulkan-release" -Recurse | Format-Table Name, FullName, Length
+          Get-ChildItem -Path "lib" -Recurse | Format-Table Name, FullName, Length
           Get-ChildItem -Path "$env:ORT_LIB_LOCATION" -Recurse | Format-Table Name, FullName, Length
 
       - name: Install Vulkan SDK
