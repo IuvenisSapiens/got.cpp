@@ -128,12 +128,6 @@ jobs:
           $artifactUrl = "https://github.com/MosRat/OnnxruntimeBuilder/releases/download/1.20.1-dml/onnxruntime-v1.20.1-windows-vs2022-x64-static-mt.7z"
           $outputPath = "$env:RUNNER_TEMP\onnxruntime-v1.20.1-windows-vs2022-x64-static-mt.7z"
           Invoke-WebRequest -Uri $artifactUrl -OutFile $outputPath
-      - name: Extract onnxruntime.zip
-        shell: powershell
-        run: |
-          $zipPath = "$env:RUNNER_TEMP\onnxruntime-v1.20.1-windows-vs2022-x64-static-mt.zip"
-          $extractPath = "$env:RUNNER_TEMP\onnxruntime"
-          Expand-Archive -Path $zipPath -DestinationPath $extractPath
 
       - name: Extract onnxruntime.7z
         shell: powershell
