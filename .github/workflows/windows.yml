@@ -180,6 +180,7 @@ jobs:
               throw "lib folder not found in the extracted zip file!"
           }
           Get-ChildItem -Path "cpp/build-x64-windows-vulkan-release" -Recurse | Format-Table Name, FullName, Length
+          Get-ChildItem -Path "$env:ORT_LIB_LOCATION" -Recurse | Format-Table Name, FullName, Length
 
       - name: Install Vulkan SDK
         id: get_vulkan
