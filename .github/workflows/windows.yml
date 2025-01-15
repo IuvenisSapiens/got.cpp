@@ -41,6 +41,11 @@ jobs:
         id: install_ninja
         run: |
           choco install ninja
+          
+      - name: Set up MSVC
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
 
       - name: Build
         id: cmake_build
