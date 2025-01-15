@@ -45,7 +45,7 @@ jobs:
       - name: Build
         id: cmake_build
         run: |
-          cmake -S cpp -B build-${{ matrix.preset }} -DCMAKE_BUILD_TYPE=Release --preset ${{ matrix.preset }}
+          cmake -S cpp -B build-${{ matrix.preset }} -DCMAKE_BUILD_TYPE=Release --preset ${{ matrix.preset }} -DCMAKE_C_COMPILER=cl -DCMAKE_CXX_COMPILER=cl
           cmake --build build-${{ matrix.preset }} --config Release -j ${env:NUMBER_OF_PROCESSORS}
 
       - name: Determine tag name
