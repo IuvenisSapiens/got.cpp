@@ -5,9 +5,9 @@
 #include "libocr.h"
 
 static bool eval_tokens(struct llama_context * ctx_llama, std::vector<llama_token> tokens, int n_batch, int * n_past) {
-    int N = (int) tokens.size();
+    int N = static_cast<int>(tokens.size());
     for (int i = 0; i < N; i += n_batch) {
-        int n_eval = (int) tokens.size() - i;
+        int n_eval = static_cast<int>(tokens.size()) - i;
         if (n_eval > n_batch) {
             n_eval = n_batch;
         }
@@ -58,13 +58,7 @@ struct llava_context {
     struct llama_model *model = NULL;
 };
 
-static void print_usage(int, char **argv) {
-    LOG("\n example usage:\n");
-    LOG("\n     %s -m <llava-v1.5-7b/ggml-model-q5_k.gguf> --mmproj <llava-v1.5-7b/mmproj-model-f16.gguf> --image "
-        "<path/to/an/image.jpg> --image <path/to/another/image.jpg> [--temp 0.1] [-p \"describe the image in "
-        "detail.\"]\n",
-        argv[0]);
-    LOG("\n note: a lower temperature value like 0.1 is recommended for better quality.\n");
+static void print_usage(int /*unused*/, char ** /*unused*/) {
 }
 
 static inline ocr_context *ocr_create_context(int argc, char **argv) {
@@ -143,7 +137,7 @@ int ocr_free_result(ocr_result *result) {
     return 0;
 }
 
-bool got_eval_image_embed(llama_context *ctx_llama, llava_image_embed *got_embed, const int32_t n_batch,
+static bool got_eval_image_embed(llama_context *ctx_llama, llava_image_embed *got_embed, const int32_t n_batch,
                           int *n_past) {
     const int n_embd = llama_model_n_embd(llama_get_model(ctx_llama));
     const auto img_tokens = got_embed->n_image_pos;
