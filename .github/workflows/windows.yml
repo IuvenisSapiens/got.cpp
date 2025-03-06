@@ -212,7 +212,7 @@ jobs:
           Compress-Archive -Path "$packageDir\*" -DestinationPath $zipPath
 
       - name: Upload got.exe as artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: got-x64-windows-vulkan-release
           path: ${{ runner.temp }}/got-x64-windows-vulkan-release.zip
